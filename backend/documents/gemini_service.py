@@ -1,6 +1,7 @@
 import os
 import json
-import google.genai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 from .models import Prompt, PromptType
 
@@ -31,38 +32,38 @@ class GeminiService:
                 prompt_type=PromptType.GENERATE_DOCUMENT, 
                 is_active=True
             )
-            final_prompt = prompt_obj.construct_prompt(document_type=document_type, state=state)
-            print(final_prompt, 'final_prompt')
+            # Use specific system_instruction if available, else fallback (empty string)
+            system_instruction = prompt_obj.system_instruction
+            
+            # Construct User Prompt (Inputs + Output Format)
+            # We treat input_format + output_format as the "User Message"
+            user_content = prompt_obj.construct_prompt(document_type=document_type, state=state)
+            
+            print("System Instruction:", system_instruction)
+            print("User Content:", user_content)
+
         except Prompt.DoesNotExist:
             print("Warning: Active prompt for GENERATE_DOCUMENT not found. Using fallback.")
-            # Fallback (Hardcoded for safety/bootstrap)
-            final_prompt = f"""
-            Act as a Legal Expert for Indian Law.
-            Create a '{document_type}' template specifically for the state of '{state}'.
-            
-            Output a JSON object with exactly two keys:
-            1. "html_content": A print-ready HTML string (A4 size styled) of the legal document. 
-               - Use placeholders for dynamic data in the format {{{{variable_name}}}}.
-               - Include CSS for clean printing (font-size 12pt, margins etc).
-               - Do not use markdown backticks or 'html' tags outside the string.
-            
-            2. "form_schema": A list of JSON objects defining the form fields for the placeholders.
-               - Each object must have: "key" (matches variable_name), "label", "type" (text, date, number, textarea), "placeholder".
-               
-            Ensure the legal content is accurate for {state}, India.
-            """
+            # Fallback
+            system_instruction = "You are an expert lawyer for Indian Law. Prioritize accuracy."
+            user_content = f"Create a '{document_type}' template for '{state}'. Return JSON with html_content and form_schema."
 
         try:
+            # Configure the model
+            config = types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.0,
+                response_mime_type="application/json"
+            )
+
             response = self.client.models.generate_content(
                 model='gemini-2.0-flash', 
-                contents=final_prompt
+                contents=user_content,
+                config=config
             )
-            result_text = response.text
-            print(result_text, 'result_text')
             
-            # Clean up potential markdown formatting from AI
-            if result_text.strip().startswith("```json"):
-                result_text = result_text.replace("```json", "").replace("```", "")
+            result_text = response.text
+            print("AI Response:", result_text)
             
             return json.loads(result_text)
             

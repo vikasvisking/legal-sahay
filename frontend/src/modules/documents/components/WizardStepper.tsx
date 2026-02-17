@@ -12,9 +12,10 @@ interface Step {
 interface WizardStepperProps {
     currentStep: number;
     steps: Step[];
+    compact?: boolean;
 }
 
-export function WizardStepper({ currentStep, steps }: WizardStepperProps) {
+export function WizardStepper({ currentStep, steps, compact = false }: WizardStepperProps) {
     return (
         <div className="w-full py-6">
             <div className="flex w-full items-center justify-between relative pl-[20px] pr-[20px]">
@@ -30,14 +31,13 @@ export function WizardStepper({ currentStep, steps }: WizardStepperProps) {
                             <motion.div
                                 initial={false}
                                 animate={{
-                                    backgroundColor: isCompleted ? "hsl(var(--secondary))" : "white",
+                                    backgroundColor: "white", // Always white background as requested
                                     borderColor: isCompleted ? "hsl(var(--secondary))" : isCurrent ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                                     scale: isCurrent ? 1 : 0.75,
-                                    boxShadow: isCurrent ? "0 0 0 4px hsl(var(--primary) / 0.2)" : "none",
                                 }}
                                 transition={{ duration: 0.3 }}
                                 className={cn(
-                                    "flex h-14 w-14 items-center justify-center rounded-full border-2 shadow-sm relative z-10 bg-white",
+                                    "flex h-14 w-14 items-center justify-center rounded-full border-2 relative z-10 bg-white",
                                     isCompleted ? "text-secondary border-secondary" : isCurrent ? "text-primary border-primary" : "text-muted-foreground border-muted-foreground"
                                 )}
                             >
@@ -48,16 +48,23 @@ export function WizardStepper({ currentStep, steps }: WizardStepperProps) {
                                 )}
                             </motion.div>
 
-                            <div className="mt-3 flex flex-col items-center text-center">
+                            <div className="mt-2 flex flex-col items-center text-center transition-all duration-300">
                                 <motion.span
                                     animate={{ color: isCompleted ? "hsl(var(--secondary))" : isCurrent ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
-                                    className="text-sm font-bold"
+                                    className={cn("text-xs font-bold transition-all duration-300", compact ? "text-[10px]" : "text-sm")}
                                 >
                                     {step.title}
                                 </motion.span>
                                 <motion.span
-                                    animate={{ opacity: isCurrent ? 1 : 0.7 }}
-                                    className="text-xs text-muted-foreground hidden sm:block mt-1 font-medium"
+                                    animate={{
+                                        opacity: isCurrent ? 1 : 0.7,
+                                        height: compact ? 0 : "auto",
+                                        marginTop: compact ? 0 : 4
+                                    }}
+                                    className={cn(
+                                        "text-xs text-muted-foreground font-medium overflow-hidden transition-all duration-300",
+                                        compact ? "" : "hidden sm:block"
+                                    )}
                                 >
                                     {step.description}
                                 </motion.span>

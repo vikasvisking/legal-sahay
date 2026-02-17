@@ -22,14 +22,14 @@ interface DocumentState {
 
     // Template Data (fetched from backend)
     template: {
-        contentHtml: string;
-        formSchema: any[];
+        content_html: string;
+        form_schema: any[];
     } | null;
 
     // Actions
     setStep: (step: number) => void;
     updateFormData: (data: Partial<DocumentFormData>) => void;
-    setTemplate: (template: { contentHtml: string; formSchema: any[] } | null) => void;
+    setTemplate: (template: { content_html: string; form_schema: any[] } | null) => void;
     resetStore: () => void;
 }
 

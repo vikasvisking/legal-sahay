@@ -80,8 +80,9 @@ class Prompt(models.Model):
     prompt_type = models.CharField(max_length=50, choices=PromptType.choices, unique=True)
     description = models.CharField(max_length=255)
     
-    # Prompt Components - Merged act_as into input_format as requested
-    input_format = models.TextField(help_text="Instructions on input context and persona")
+    # Prompt Components
+    system_instruction = models.TextField(help_text="System-level instructions for the AI (Persona, constraints)", default="")
+    input_format = models.TextField(help_text="Instructions on input context and dynamic variables")
     output_format = models.TextField(help_text="Instructions on expected output format (JSON/HTML)")
     
     is_active = models.BooleanField(default=True)

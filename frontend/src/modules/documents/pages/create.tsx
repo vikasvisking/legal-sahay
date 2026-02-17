@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import { motion } from "framer-motion";
 import { MapPin, FileEdit, FileText, CreditCard } from "lucide-react";
 
@@ -15,28 +17,46 @@ const STEPS = [
     { id: 4, title: "Payment", description: "Secure Payment", icon: CreditCard },
 ];
 
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
+
 export default function CreateDocument() {
     const { currentStep } = useDocumentStore();
+    const scrollDirection = useScrollDirection();
+    const [isSticky, setIsSticky] = React.useState(false);
+
+    React.useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                console.log('Sticky Sentinel Intersecting:', entry.isIntersecting, entry.boundingClientRect.top);
+                setIsSticky(!entry.isIntersecting);
+            },
+            { threshold: 0 }
+        );
+        const sentinel = document.getElementById("sticky-sentinel");
+        if (sentinel) observer.observe(sentinel);
+
+        return () => {
+            if (sentinel) observer.unobserve(sentinel);
+        };
+    }, []);
+
+    // Show when scrolling up OR when at the very top (not sticky yet)
+    const isVisible = scrollDirection === "up" || !isSticky;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-6 px-4">
-            <div className="container mx-auto max-w-5xl">
+            <div className="w-full max-w-[1920px] mx-auto px-4 lg:px-8 relative">
 
                 {/* Header Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="mb-6 text-center"
-                >
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Create Legal Document</h1>
-                    <p className="text-sm text-muted-foreground">Follow the simple steps to draft your document in minutes.</p>
-                </motion.div>
+                {/* <motion.div ... /> */}
 
-                {/* Wizard Stepper - Sticky */}
-                <div className="sticky top-0 z-50 bg-slate-50/95 backdrop-blur supports-[backdrop-filter]:bg-slate-50/60 py-4 mb-2 -mx-4 px-4">
+                {/* Sentinel for sticky detection - In-flow 1px div */}
+                <div id="sticky-sentinel" className="h-[1px] w-full" />
+
+
+                <div className={`sticky top-0 z-50 transition-all duration-300 transform ${isVisible ? 'translate-y-0' : '-translate-y-[150%]'} ${isSticky ? 'py-2 bg-slate-50/95 backdrop-blur supports-[backdrop-filter]:bg-slate-50/60 -mx-4 px-4' : 'py-4 mb-2'}`}>
                     <div className="max-w-3xl mx-auto">
-                        <WizardStepper currentStep={currentStep} steps={STEPS} />
+                        <WizardStepper currentStep={currentStep} steps={STEPS} compact={isSticky} />
                     </div>
                 </div>
 
