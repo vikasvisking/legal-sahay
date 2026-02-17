@@ -1,0 +1,50 @@
+```ignore
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Django stuff:
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+migrations/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+```
