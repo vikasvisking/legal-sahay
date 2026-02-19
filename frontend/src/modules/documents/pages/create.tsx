@@ -9,6 +9,7 @@ import { WizardStepper } from "../components/WizardStepper";
 import { useDocumentStore } from "../store/document.store";
 import { LocationStep } from "../components/steps/LocationStep";
 import { DetailsStep } from "../components/steps/DetailsStep";
+import { ReviewStep } from "../components/steps/ReviewStep";
 
 const STEPS = [
     { id: 1, title: "Location", description: "Select Type & Location", icon: MapPin },
@@ -64,7 +65,7 @@ export default function CreateDocument() {
                 <div className="min-h-[400px]">
                     {currentStep === 1 && <LocationStep />}
                     {currentStep === 2 && <DetailsStep />}
-                    {currentStep === 3 && <div className="text-center p-10">Review Step (Coming Soon)</div>}
+                    {currentStep === 3 && <ReviewStep />}
                     {currentStep === 4 && <div className="text-center p-10">Payment Step (Coming Soon)</div>}
                 </div>
 

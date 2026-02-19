@@ -13,6 +13,14 @@ interface DocumentFormData {
 
     // Step 2: Dynamic Form Data
     dynamicData?: Record<string, any>;
+
+    // Step 3: Review Data
+    customClauses: {
+        id: string;
+        type: 'clause' | 'section';
+        title?: string;
+        content: string;
+    }[];
 }
 
 interface DocumentState {
@@ -29,6 +37,8 @@ interface DocumentState {
     // Actions
     setStep: (step: number) => void;
     updateFormData: (data: Partial<DocumentFormData>) => void;
+    addCustomClause: (clause: { type: 'clause' | 'section'; title?: string; content: string }) => void;
+    removeCustomClause: (id: string) => void;
     setTemplate: (template: { content_html: string; form_schema: any[] } | null) => void;
     resetStore: () => void;
 }
@@ -48,6 +58,7 @@ const INITIAL_FORM_DATA: DocumentFormData = {
     district: "",
     city: "",
     dynamicData: {},
+    customClauses: [],
 };
 
 export const useDocumentStore = create<DocumentState>()(
@@ -68,6 +79,23 @@ export const useDocumentStore = create<DocumentState>()(
 
             updateFormData: (data) => set((state) => ({
                 formData: { ...state.formData, ...data }
+            })),
+
+            addCustomClause: (clause) => set((state) => ({
+                formData: {
+                    ...state.formData,
+                    customClauses: [
+                        ...(state.formData.customClauses || []),
+                        { ...clause, id: crypto.randomUUID() }
+                    ]
+                }
+            })),
+
+            removeCustomClause: (id) => set((state) => ({
+                formData: {
+                    ...state.formData,
+                    customClauses: (state.formData.customClauses || []).filter(c => c.id !== id)
+                }
             })),
 
             setTemplate: (template) => set({ template }),
