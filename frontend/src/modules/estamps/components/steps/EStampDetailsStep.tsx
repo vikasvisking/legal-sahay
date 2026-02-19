@@ -196,7 +196,16 @@ export function EStampDetailsStep() {
                                         control={control}
                                         name="stateId"
                                         render={({ field }) => (
-                                            <Select value={field.value} onValueChange={field.onChange}>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={(val) => {
+                                                    field.onChange(val);
+                                                    const selectedState = states.find(s => String(s.id) === val);
+                                                    if (selectedState) {
+                                                        updateFormData({ stateName: selectedState.name });
+                                                    }
+                                                }}
+                                            >
                                                 <SelectTrigger className={errors.stateId && "border-red-500"}>
                                                     <SelectValue placeholder="Select State" />
                                                 </SelectTrigger>
@@ -214,7 +223,17 @@ export function EStampDetailsStep() {
                                         control={control}
                                         name="articleId"
                                         render={({ field }) => (
-                                            <Select value={field.value} onValueChange={field.onChange} disabled={!watchStateId}>
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={(val) => {
+                                                    field.onChange(val);
+                                                    const selectedArticle = articles.find(a => String(a.id) === val);
+                                                    if (selectedArticle) {
+                                                        updateFormData({ articleName: selectedArticle.title });
+                                                    }
+                                                }}
+                                                disabled={!watchStateId}
+                                            >
                                                 <SelectTrigger className={errors.articleId && "border-red-500"}>
                                                     <SelectValue placeholder="Select a Article" />
                                                 </SelectTrigger>

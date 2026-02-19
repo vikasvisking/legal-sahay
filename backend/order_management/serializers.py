@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from masters.models import State, Article
-from .models import Order, OrderParty, ShippingAddress
+from .models import Order, OrderParty, ShippingAddress, DeliveryType
 
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,17 +41,17 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['order_number', 'status', 'total_amount', 'user', 'vendor']
 
     def validate(self, data):
-        delivery_type = data.get('delivery_type', Order.DeliveryType.DIGITAL)
+        delivery_type = data.get('delivery_type', DeliveryType.DIGITAL)
         
         # Digital Delivery Validation
-        if delivery_type in [Order.DeliveryType.DIGITAL, Order.DeliveryType.BOTH]:
+        if delivery_type in [DeliveryType.DIGITAL, DeliveryType.BOTH]:
             if not data.get('delivery_email'):
                 raise serializers.ValidationError({"delivery_email": "Required for Digital/Both delivery."})
             if not data.get('delivery_mobile'):
                 raise serializers.ValidationError({"delivery_mobile": "Required for Digital/Both delivery."})
         
         # Physical Delivery Validation
-        if delivery_type in [Order.DeliveryType.PHYSICAL, Order.DeliveryType.BOTH]:
+        if delivery_type in [DeliveryType.PHYSICAL, DeliveryType.BOTH]:
             if not self.initial_data.get('shipping_address'):
                 raise serializers.ValidationError({"shipping_address": "Required for Physical/Both delivery."})
                 
@@ -64,7 +64,7 @@ class OrderSerializer(serializers.ModelSerializer):
         # Calculate fees (Basic logic for now)
         # TODO: Move to a calculation service
         validated_data['service_fee'] = 50  # Example fixed fee
-        if validated_data.get('delivery_type') in [Order.DeliveryType.PHYSICAL, Order.DeliveryType.BOTH]:
+        if validated_data.get('delivery_type') in [DeliveryType.PHYSICAL, DeliveryType.BOTH]:
             validated_data['shipping_fee'] = 100
         else:
             validated_data['shipping_fee'] = 0
@@ -85,7 +85,7 @@ class OrderSerializer(serializers.ModelSerializer):
         for party in parties_data:
             OrderParty.objects.create(order=order, **party)
             
-        if shipping_data and validated_data.get('delivery_type') != Order.DeliveryType.DIGITAL:
+        if shipping_data and validated_data.get('delivery_type') != DeliveryType.DIGITAL:
             ShippingAddress.objects.create(order=order, **shipping_data)
             
         return order

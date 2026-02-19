@@ -33,5 +33,15 @@ export const EStampService = {
             console.error("Failed to fetch articles", error);
             return [];
         }
+    },
+
+    createOrder: async (payload: any) => { // using any for now to avoid strict typing issues during dev, or import OrderPayload
+        try {
+            const response = await axiosInstance.post('/api/orders/orders/', payload);
+            return response.data;
+        } catch (error) {
+            console.error("Failed to create order", error);
+            throw error;
+        }
     }
 };

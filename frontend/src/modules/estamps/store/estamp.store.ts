@@ -15,7 +15,9 @@ const INITIAL_PARTY: PartyDetails = {
 
 const INITIAL_FORM_DATA: EStampFormData = {
     stateId: '',
+    stateName: '',
     articleId: '',
+    articleName: '',
     description: '',
     considerationPrice: '',
     stampDutyAmount: '',

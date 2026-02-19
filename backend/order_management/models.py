@@ -65,7 +65,7 @@ class OrderParty(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='parties')
     party_type = models.CharField(max_length=20, choices=PartyType.choices)
     name = models.CharField(max_length=200)
-    relation_name = models.CharField(max_length=200, help_text="Father/Husband Name")
+    relation_name = models.CharField(max_length=200, help_text="Father/Husband Name", null=True, blank=True)
     
     # Address Details
     address = models.TextField()

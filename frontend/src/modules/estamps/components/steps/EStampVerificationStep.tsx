@@ -1,6 +1,5 @@
-"use client";
-
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useEStampStore } from "@/modules/estamps/store/estamp.store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -9,14 +8,98 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, ChevronRight, Stamp, Truck, User, FileCheck, Receipt, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
+import { OrderPayload, OrderParty } from "../../types/estamp.types";
+import { EStampService } from "../../services/estamp.service";
 
 export function EStampVerificationStep() {
-    const { formData, fees, calculateFees, setStep } = useEStampStore();
+    const { formData, fees, calculateFees, setStep, resetStore } = useEStampStore();
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         calculateFees();
     }, [formData.considerationPrice, formData.stampDutyAmount, formData.deliveryMode]);
+
+    const handlePayment = async () => {
+        if (!isConfirmed) return;
+        setIsProcessing(true);
+
+        try {
+
+            // Construct Payload
+            const parties: OrderParty[] = [
+                {
+                    party_type: "FIRST_PARTY",
+                    name: formData.firstParty.name,
+                    relation_name: formData.firstParty.relationName || "",
+                    address: formData.firstParty.address,
+                    city: formData.firstParty.city,
+                    state: formData.firstParty.state,
+                    pincode: formData.firstParty.pincode,
+                    identity_number: formData.firstParty.pan || ""
+                },
+                {
+                    party_type: "SECOND_PARTY",
+                    name: formData.secondParty.name,
+                    relation_name: formData.secondParty.relationName || "",
+                    address: formData.secondParty.address,
+                    city: formData.secondParty.city,
+                    state: formData.secondParty.state,
+                    pincode: formData.secondParty.pincode,
+                    identity_number: formData.secondParty.pan || ""
+                }
+            ];
+
+            const payload: OrderPayload = {
+                service_type: "ESTAMP",
+                delivery_type: formData.deliveryMode,
+                delivery_email: formData.shippingEmail || undefined,
+                delivery_mobile: formData.shippingMobile || undefined,
+                state: parseInt(formData.stateId) || 0, // Ensure number
+                article: parseInt(formData.articleId) || 0, // Ensure number
+                document_reason: formData.description,
+                consideration_price: formData.considerationPrice,
+                stamp_amount: formData.stampDutyAmount,
+                service_fee: fees.serviceFee.toString(),
+                shipping_fee: fees.deliveryFee.toString(),
+                parties: parties,
+            };
+
+            // Add shipping address if physical delivery
+            if (formData.deliveryMode === 'PHYSICAL' || formData.deliveryMode === 'BOTH') {
+                if (formData.shippingAddress) {
+                    payload.shipping_address = {
+                        receiver_name: formData.shippingAddress.name || "",
+                        contact_number: formData.shippingAddress.mobile || "",
+                        address_line: formData.shippingAddress.address || "",
+                        pincode: formData.shippingAddress.pincode || "",
+                        city: formData.shippingAddress.city || "",
+                        state: formData.shippingAddress.state || ""
+                    };
+                }
+            }
+
+            // Create Order
+            await EStampService.createOrder(payload);
+
+            // Simulate Payment Processing
+            setTimeout(() => {
+                setIsProcessing(false);
+                toast.success("Payment Successful!");
+                router.push("/orders/success");
+                // Alternatively /orders/failed based on random logic if desired, but user said "redirect any one of it"
+                // For now, success path is better for demo.
+            }, 1000);
+
+        } catch (error) {
+            console.error("Payment Error:", error);
+            setIsProcessing(false);
+            toast.error("Failed to create order. Please try again.");
+            // router.push("/orders/failed"); // Uncomment to test failure
+        }
+    };
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -40,11 +123,11 @@ export function EStampVerificationStep() {
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <p className="text-slate-500">State</p>
-                                        <p className="font-medium">{formData.stateId}</p>
+                                        <p className="font-medium">{formData.stateName || formData.stateId}</p>
                                     </div>
                                     <div>
                                         <p className="text-slate-500">Article</p>
-                                        <p className="font-medium">{formData.articleId}</p>
+                                        <p className="font-medium">{formData.articleName || formData.articleId}</p>
                                     </div>
                                     <div className="col-span-2">
                                         <p className="text-slate-500">Description</p>
@@ -220,10 +303,10 @@ export function EStampVerificationStep() {
                                 </div>
 
                                 <Button
-                                    onClick={() => setStep(3)}
+                                    onClick={handlePayment}
                                     className="w-full h-12 text-base shadow-lg shadow-primary/25 transition-all hover:shadow-primary/40"
                                     size="lg"
-                                    disabled={!isConfirmed}
+                                    disabled={!isConfirmed || isProcessing}
                                 >
                                     Pay Now <ChevronRight className="ml-2 h-4 w-4" />
                                 </Button>
