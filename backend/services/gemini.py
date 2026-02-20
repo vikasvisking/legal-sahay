@@ -3,7 +3,7 @@ import json
 from google import genai
 from google.genai import types
 from django.conf import settings
-from .models import Prompt, PromptType
+from documents.models import Prompt, PromptType
 
 class GeminiService:
     def __init__(self):

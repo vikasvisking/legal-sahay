@@ -75,6 +75,7 @@ class UserDocument(models.Model):
 class PromptType(models.TextChoices):
     GENERATE_DOCUMENT = 'GENERATE_DOCUMENT', _('Generate Document')
     SUMMARIZE_LEGAL = 'SUMMARIZE_LEGAL', _('Summarize Legal Text')
+    VERIFY_DOCUMENT = 'VERIFY_DOCUMENT', _('Verify Document Correctness')
 
 class Prompt(models.Model):
     prompt_type = models.CharField(max_length=50, choices=PromptType.choices, unique=True)

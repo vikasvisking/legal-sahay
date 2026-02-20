@@ -17,3 +17,11 @@ class TemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Template
         fields = ['id', 'document_type', 'state', 'content_html', 'form_schema', 'status', 'is_active']
+
+from .models import UserDocument
+
+class UserDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserDocument
+        fields = '__all__'
+

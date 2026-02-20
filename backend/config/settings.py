@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'masters',
     'order_management',
     'estamps',
-    'services',
+    # 'services',  # Utility package, not an app
     'payments',
     'consultations',
 ]

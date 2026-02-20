@@ -1,9 +1,9 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import DocumentCategory, DocumentType, Template
-from .serializers import DocumentCategorySerializer, DocumentTypeSerializer, TemplateSerializer
-from .gemini_service import GeminiService
+from rest_framework.decorators import action
+from .models import DocumentCategory, DocumentType, Template, UserDocument
+from .serializers import DocumentCategorySerializer, DocumentTypeSerializer, TemplateSerializer, UserDocumentSerializer
+from services.gemini import GeminiService
 
 class DocumentCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = DocumentCategory.objects.all()

@@ -3,7 +3,8 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from .models import DocumentCategory, DocumentType, Template, Prompt, PromptType
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from services.gemini import GeminiService
 
 User = get_user_model()
 
@@ -37,7 +38,7 @@ class DocumentServiceTests(TestCase):
         self.assertEqual(prompt.history.first().input_format, "Updated Input...")
         self.assertEqual(prompt.history.last().input_format, "Input...")
 
-    @patch('documents.gemini_service.GeminiService.generate_template')
+    @patch('services.gemini.GeminiService.generate_template')
     def test_generate_ai_template(self, mock_generate):
         """Test triggering AI generation when template is missing"""
         # Create a Prompt to ensure DB path is taken (though logic mocked)
